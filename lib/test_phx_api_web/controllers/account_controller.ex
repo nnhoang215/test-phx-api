@@ -3,7 +3,7 @@ defmodule TestPhxApiWeb.AccountController do
 
   alias TestPhxApi.{Accounts, Accounts.Account, Users, Users.User}
   alias TestPhxApi.Accounts.Account
-  alias TestPhxApiWeb.Auth.Guardian
+  alias TestPhxApiWeb.{Auth.Guardian, Auth.ErrorResponse}
 
   action_fallback TestPhxApiWeb.FallbackController
 
@@ -19,6 +19,16 @@ defmodule TestPhxApiWeb.AccountController do
       conn
       |> put_status(:created)
       |> render(:account_token, %{account: account, token: token})
+    end
+  end
+  
+  def sign_in(conn, %{"email" => email, "hash_password" => hash_password}) do
+    case Guardian.authenticate(email, hash_password) do
+      {:ok, account, token} ->
+        conn
+        |> put_status(:ok)
+        |> render(:account_token, %{account: account, token: token})
+      {:error, :unauthorized} -> raise ErrorResponse.Unauthorized, message: "Email or Password incorrect."
     end
   end
 
