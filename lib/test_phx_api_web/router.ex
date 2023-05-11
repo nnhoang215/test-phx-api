@@ -2,20 +2,22 @@ defmodule TestPhxApiWeb.Router do
   use TestPhxApiWeb, :router
   use Plug.ErrorHandler
 
-  def handle_errors(conn, %{reason: %Phoenix.Router.NoRouteError{message: message}}) do
+  defp handle_errors(conn, %{reason: %Phoenix.Router.NoRouteError{message: message}}) do
     conn |> json(%{errors: message}) |> halt()
   end
   
-  def handle_errors(conn, %{reason: %{message: message}}) do
+  defp handle_errors(conn, %{reason: %{message: message}}) do
     conn |> json(%{errors: message}) |> halt()
   end
   
   pipeline :auth do
     plug TestPhxApiWeb.Auth.Pipeline
+    plug TestPhxApiWeb.Auth.SetAccount
   end
   
   pipeline :api do
     plug :accepts, ["json"]
+    plug :fetch_session
   end
 
   scope "/api", TestPhxApiWeb do
