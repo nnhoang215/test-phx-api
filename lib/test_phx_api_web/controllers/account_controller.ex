@@ -5,8 +5,20 @@ defmodule TestPhxApiWeb.AccountController do
   alias TestPhxApi.Accounts.Account
   alias TestPhxApiWeb.{Auth.Guardian, Auth.ErrorResponse}
 
+  plug :is_authorized_account when action in [:update, :delete]
+  
   action_fallback TestPhxApiWeb.FallbackController
 
+  defp is_authorized_account(conn, _opts) do
+    %{params: %{"account" => params}} = conn
+    account = Accounts.get_account!(params["id"])
+    if conn.assigns.account.id == account.id do
+      conn
+    else
+      raise ErrorResponse.Forbidden
+    end
+  end  
+  
   def index(conn, _params) do
     accounts = Accounts.list_accounts()
     render(conn, :index, accounts: accounts)
@@ -23,11 +35,10 @@ defmodule TestPhxApiWeb.AccountController do
   end
   
   # overload to catch bad requests
-  def create(conn, account_params) do 
+  def create(conn, _account_params) do 
       conn
       |> put_status(:bad_request)
       |> json(%{error: "Invalid Request body format"})
-    end
   end
   
   def sign_in(conn, %{"email" => email, "hash_password" => hash_password}) do
@@ -47,8 +58,8 @@ defmodule TestPhxApiWeb.AccountController do
     # render(conn, :show, account: conn.assigns.account) // show the account stored in session
   end
 
-  def update(conn, %{"id" => id, "account" => account_params}) do
-    account = Accounts.get_account!(id)
+  def update(conn, %{"account" => account_params}) do
+    account = Accounts.get_account!(account_params["id"])
 
     with {:ok, %Account{} = account} <- Accounts.update_account(account, account_params) do
       render(conn, :show, account: account)
