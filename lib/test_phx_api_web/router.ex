@@ -2,11 +2,11 @@ defmodule TestPhxApiWeb.Router do
   use TestPhxApiWeb, :router
   use Plug.ErrorHandler
 
-  defp handle_errors(conn, %{reason: %Phoenix.Router.NoRouteError{message: message}}) do
+  def handle_errors(conn, %{reason: %Phoenix.Router.NoRouteError{message: message}}) do
     conn |> json(%{errors: message}) |> halt()
   end
   
-  defp handle_errors(conn, %{reason: %{message: message}}) do
+  def handle_errors(conn, %{reason: %{message: message}}) do
     conn |> json(%{errors: message}) |> halt()
   end
   

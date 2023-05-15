@@ -27,5 +27,9 @@ defmodule TestPhxApi.Accounts.Account do
     change(changeset, hash_password: Bcrypt.hash_pwd_salt(hash_password))
   end
   
-  defp put_password_hash(changeset), do: changeset
+  # The second definition of put_password_hash/1 is the catch-all clause, which means it will match
+  # any changeset that doesn't match the pattern of the previous definition. 
+  # This function simply returns the unchanged changeset without modifying it. 
+  # This definition acts as a fallback or default behavior when the changeset is not valid or doesn't contain a hash_password field.
+  defp put_password_hash(changeset), do: changeset 
 end

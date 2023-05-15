@@ -22,6 +22,14 @@ defmodule TestPhxApiWeb.AccountController do
     end
   end
   
+  # overload to catch bad requests
+  def create(conn, account_params) do 
+      conn
+      |> put_status(:bad_request)
+      |> json(%{error: "Invalid Request body format"})
+    end
+  end
+  
   def sign_in(conn, %{"email" => email, "hash_password" => hash_password}) do
     case Guardian.authenticate(email, hash_password) do
       {:ok, account, token} ->
@@ -36,7 +44,7 @@ defmodule TestPhxApiWeb.AccountController do
   def show(conn, %{"id" => id}) do
     account = Accounts.get_account!(id)
     render(conn, :show, account: account)
-    # render(conn, :show, account: conn.assigns.account)
+    # render(conn, :show, account: conn.assigns.account) // show the account stored in session
   end
 
   def update(conn, %{"id" => id, "account" => account_params}) do
